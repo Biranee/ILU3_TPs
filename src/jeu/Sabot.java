@@ -10,7 +10,7 @@ public class Sabot implements Iterable<Carte> {
 
     private final Carte[] cartes;
     private int nbCartes;
-    private int modCount = 0;
+    private int compteurModifs = 0;
 
     public Sabot(Carte[] source) {
         this.cartes = new Carte[source.length];
@@ -22,53 +22,53 @@ public class Sabot implements Iterable<Carte> {
         return nbCartes == 0;
     }
 
-    public void ajouterCarte(Carte c) {
+    public void ajouterCarte(Carte carte) {
         if (nbCartes >= cartes.length) {
             throw new IllegalStateException("Capacité du sabot dépassée");
         }
-        cartes[nbCartes++] = c;
-        modCount++;
+        cartes[nbCartes++] = carte;
+        compteurModifs++;
     }
 
     @Override
     public Iterator<Carte> iterator() {
         return new Iterator<Carte>() {
-            int cursor = 0;
-            int lastRet = -1;
-            int expectedModCount = modCount;
+            int curseur = 0;
+            int dernierRendu = -1;
+            int compteurAttendu = compteurModifs;
 
-            private void checkForComod() {
-                if (expectedModCount != modCount) {
+            private void verifierModifsConcurrentes() {
+                if (compteurAttendu != compteurModifs) {
                     throw new ConcurrentModificationException();
                 }
             }
 
             @Override
-            public boolean hasNext() {
-                return cursor < nbCartes;
+            public boolean hasNext() { 
+                return curseur < nbCartes;
             }
 
             @Override
             public Carte next() {
-                checkForComod();
+                verifierModifsConcurrentes();
                 if (!hasNext()) throw new NoSuchElementException();
-                lastRet = cursor;
-                return cartes[cursor++];
+                dernierRendu = curseur;
+                return cartes[curseur++];
             }
 
             @Override
             public void remove() {
-                checkForComod();
-                if (lastRet < 0) throw new IllegalStateException("remove() sans next()");
-                int numMoved = nbCartes - lastRet - 1;
-                if (numMoved > 0) {
-                    System.arraycopy(cartes, lastRet + 1, cartes, lastRet, numMoved);
+                verifierModifsConcurrentes();
+                if (dernierRendu < 0) throw new IllegalStateException("remove() sans next()");
+                int nbDeplacements = nbCartes - dernierRendu - 1;
+                if (nbDeplacements > 0) {
+                    System.arraycopy(cartes, dernierRendu + 1, cartes, dernierRendu, nbDeplacements);
                 }
                 cartes[--nbCartes] = null;
-                cursor = lastRet;
-                lastRet = -1;
-                modCount++;
-                expectedModCount = modCount;
+                curseur = dernierRendu;
+                dernierRendu = -1;
+                compteurModifs++;
+                compteurAttendu = compteurModifs;
             }
         };
     }
@@ -76,8 +76,8 @@ public class Sabot implements Iterable<Carte> {
     public Carte piocher() {
         Iterator<Carte> it = iterator();
         if (!it.hasNext()) throw new NoSuchElementException("Sabot vide");
-        Carte c = it.next();
+        Carte carte = it.next();
         it.remove();
-        return c;
+        return carte;
     }
 }

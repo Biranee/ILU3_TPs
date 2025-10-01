@@ -5,66 +5,57 @@ import java.util.Iterator;
 import cartes.Botte;
 import cartes.Carte;
 import cartes.JeuDeCartes;
-import cartes.Type;
 import jeu.Sabot;
 
 public class TestSabot {
+	JeuDeCartes jeu = new JeuDeCartes();
+	Sabot sabot = new Sabot(jeu.donnerCartes());
 
-    private final JeuDeCartes jeu = new JeuDeCartes();
-    private Sabot sabot = new Sabot(jeu.donnerCartes());
+	// 4.2.a
+	public void questionA() {
 
-    // 4.2.a : utiliser piocher jusqu'à ce que le sabot soit vide
-    public void questionA() {
-        while (!sabot.estVide()) {
-            Carte carte = sabot.piocher();
-            System.out.println("je pioche " + carte);
-        }
-    }
+		while (!sabot.estVide()) {
+			Carte carte = sabot.piocher();
+			System.out.println("Je pioche " + carte);
+		}
+//		Console :
+//		Je pioche Accident
+//		Je pioche Accident
+//		Je pioche Accident
+//		Je pioche R�paration
+//		Je pioche R�paration
+//		Je pioche R�paration
+//		Je pioche As du volant
+	}
 
-    // 4.2.b : même résultat avec itérateur + remove()
-    public void questionB() {
-        sabot = new Sabot(jeu.donnerCartes());
-        for (Iterator<Carte> it = sabot.iterator(); it.hasNext();) {
-            Carte carte = it.next();
-            System.out.println("je pioche " + carte);
-            it.remove();
-        }
-    }
+	// 4.2.b
+	public void questionB() {
+		for (Iterator<Carte> iterator = sabot.iterator(); iterator.hasNext();) {
+			System.out.println("Je pioche " + iterator.next());
+			iterator.remove();
+		}
+	}
 
-    // 4.2.c : provoquer des exceptions
-    public void questionC() {
-        // Cas 1 : appel à piocher dans une boucle d'itération
-        sabot = new Sabot(jeu.donnerCartes());
-        try {
-            for (Carte c : sabot) {
-                System.out.println("je pioche " + c);
-                sabot.piocher(); // modification concurrente
-                break;
-            }
-        } catch (Exception e) {
-            System.out.println("Exception attendue : " + e);
-        }
+	// 4.2.c
+	public void questionC() {
+		Carte cartePiochee = sabot.piocher();
+		System.out.println("Je pioche " + cartePiochee);
+		for (Iterator<Carte> iterator = sabot.iterator(); iterator.hasNext();) {
+			Carte carte = iterator.next();
+			System.out.println("Je pioche " + carte);
+			iterator.remove();
+			cartePiochee = sabot.piocher();
+			sabot.ajouterCarte(new Botte(cartes.Type.ACCIDENT));
+		}
+		Iterator<Carte> iterator = sabot.iterator();
+		System.out.println("\nLa pioche contient encore des cartes ? " + iterator.hasNext());
+	}
 
-        // Cas 2 : après avoir pioché une carte, insérer As du volant pendant l'itération
-        sabot = new Sabot(jeu.donnerCartes());
-        sabot.piocher(); // libère une place
-        try {
-            for (Carte c : sabot) {
-                sabot.ajouterCarte(new Botte(Type.ACCIDENT)); // insertion concurrente
-                break;
-            }
-        } catch (Exception e) {
-            System.out.println("Exception attendue : " + e);
-        }
-    }
-
-    public static void main(String[] args) {
-        TestSabot test = new TestSabot();
-        System.out.println("===== Question A =====");
-        test.questionA();
-        System.out.println("===== Question B =====");
-        test.questionB();
-        System.out.println("===== Question C =====");
-        test.questionC();
-    }
+	public static void main(String[] args) {
+		TestSabot testPioche = new TestSabot();
+//		testPioche.questionA();
+//		testPioche.questionB();
+		testPioche.questionC();
+	} 
+	
 }
