@@ -1,16 +1,21 @@
 package cartes;
 
 public enum Type {
-	FEU("feu rouge", "feu vert"),
-	ESSENCE("panne d'essence","Essence"),
-	CREVAISON("crevaison ", " roue de secours"),
-	ACCIDENT("accident", "réparation"),
-	
-	Type(String string, String string2) {
-		// TODO Auto-generated constructor stub
+    FEU("Feu Rouge", "Feu Vert", "Prioritaire"),
+    ESSENCE("Panne d'essence", "Bidon d'essence", "Citerne"),
+    CREVAISON("Crevaison", "Roue de secours", "Increvable"),
+    ACCIDENT("Accident", "Réparation", "As du volant");
+
+	private final String attaque;
+	private final String parade;
+	private final String botte;
+
+	Type(String attaque, String parade, String botte) {
+	    this.attaque = attaque;
+	    this.parade = parade;
+	    this.botte = botte;
 	}
-
-	private final String attaque , parade, botte;
-	Type 
+    public String nomAttaque() { return attaque; }
+    public String nomParade()  { return parade; }
+    public String nomBotte()   { return botte; }
 }
-
