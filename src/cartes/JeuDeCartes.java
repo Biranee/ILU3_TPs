@@ -47,6 +47,21 @@ public class JeuDeCartes {
 	    }
 	    return total == 106;
 	}
+	public Carte[] donnerCartes() {
+	    int total = 0;
+	    for (Configuration cfg : typesDeCartes) {
+	        total += cfg.getNbExemplaires();
+	    }
+
+	    Carte[] toutes = new Carte[total];
+	    int k = 0;
+	    for (Configuration cfg : typesDeCartes) {
+	        for (int i = 0; i < cfg.getNbExemplaires(); i++) {
+	            toutes[k++] = cfg.getCarte();
+	        }
+	    }
+	    return toutes;
+	}
 	//test
 	public Configuration[] getTypesDeCartes() {return typesDeCartes;}
 
