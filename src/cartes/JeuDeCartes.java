@@ -1,5 +1,9 @@
 package cartes;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 public class JeuDeCartes {
 
 	private Configuration[] typesDeCartes = new Configuration[] { new Configuration(new Borne(25), 10),
@@ -48,34 +52,42 @@ public class JeuDeCartes {
 	}
 
 	public Carte[] donnerCartes() {
-		int total = 0;
-		for (Configuration cfg : typesDeCartes)
-			total += cfg.getNbExemplaires();
-		Carte[] toutes = new Carte[total];
-		for (int i = 0, k = 0; i < typesDeCartes.length; i++) {
-			Configuration cfg = typesDeCartes[i];
-			for (int j = 0; i < cfg.getNbExemplaires(); j++) {
-				toutes[k++] = cfg.getCarte();
-			}
-		}
-		return toutes;
+	    int total = 0;
+	    for (Configuration configuration : typesDeCartes) {
+	        total += configuration.getNbExemplaires();
+	    }
+
+	    Carte[] toutesLesCartes = new Carte[total];
+	    int index = 0;
+
+	    for (Configuration configuration : typesDeCartes) {
+	        int quantite = configuration.getNbExemplaires();
+	        Carte modele = configuration.getCarte();
+	        for (int j = 0; j < quantite; j++) { // <-- j ici (pas i)
+	            toutesLesCartes[index++] = modele;
+	        }
+	    }
+	    return toutesLesCartes;
 	}
 
 	public boolean checkCount() {
-		Carte[] toutes = donnerCartes();
-		int attenduTotal = 0;
-		for (Configuration cfg : typesDeCartes)
-			attenduTotal += cfg.getNbExemplaires();
-		if (toutes.length != attenduTotal)
-			return false;
-		for (Configuration cfg : typesDeCartes) {
-			int vus = 0;
-			for (Carte c : toutes)
-				if (c.equals(cfg.getCarte()))
-					vus++;
-			if (vus != cfg.getNbExemplaires())
-				return false;
-		}
-		return true;
+	    Carte[] toutesLesCartes = donnerCartes();
+
+	    int totalAttendu = 0;
+	    for (Configuration configuration : typesDeCartes) {
+	        totalAttendu += configuration.getNbExemplaires();
+	    }
+	    if (toutesLesCartes.length != totalAttendu) {
+	        return false;
+	    }
+
+	    List<Carte> listeCartes = Arrays.asList(toutesLesCartes);
+	    for (Configuration configuration : typesDeCartes) {
+	        int effectifObserve = Collections.frequency(listeCartes, configuration.getCarte());
+	        if (effectifObserve != configuration.getNbExemplaires()) {
+	            return false;
+	        }
+	    }
+	    return true;
 	}
 }
