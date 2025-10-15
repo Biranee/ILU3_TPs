@@ -10,7 +10,7 @@ import utils.GestionCartes;
 public class Jeu {
 	private Sabot sabot;
 
-	public Jeu() {
+	protected Jeu() {
 		JeuDeCartes jeuDeCartes = new JeuDeCartes();
 		Carte[] cartes = jeuDeCartes.donnerCartes();
 
@@ -21,7 +21,7 @@ public class Jeu {
 		sabot = new Sabot(tableauMelangee);
 	}
 
-	public Sabot getSabot() {
+	protected Sabot getSabot() {
 		return sabot;
 
 	}
