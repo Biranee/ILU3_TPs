@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.Objects;
 import java.util.Random;
 
 public final class GestionCartes {
@@ -12,9 +11,10 @@ public final class GestionCartes {
 	private static final Random GENERATEUR = new Random();
 
 	private GestionCartes() {
+		throw new IllegalStateException("Utility class");
 	}
 
-	public static <T> T extraire(List<T> liste) {
+	public static <E> E extraire(List<E> liste) {
 		if (liste == null || liste.isEmpty()) {
 			throw new IllegalArgumentException("La liste ne doit pas être vide.");
 		}
@@ -22,118 +22,82 @@ public final class GestionCartes {
 		return liste.remove(indiceAleatoire);
 	}
 
-	public static <T> T extraireIterator(List<T> liste) {
+	public static <E> E extraireIterator(List<E> liste) {
 		if (liste == null || liste.isEmpty()) {
 			throw new IllegalArgumentException("La liste ne doit pas être vide.");
 		}
 		int indiceAleatoire = GENERATEUR.nextInt(liste.size());
-		T elementChoisi = null;
+		E elementChoisi = null;
 		int position = 0;
-		for (ListIterator<T> iterateur = liste.listIterator(); iterateur.hasNext(); position++) {
-			T elementCourant = iterateur.next();
+
+		for (ListIterator<E> it = liste.listIterator(); it.hasNext(); position++) {
+			E element = it.next();
 			if (position == indiceAleatoire) {
-				elementChoisi = elementCourant;
-				iterateur.remove();
+				elementChoisi = element;
+				it.remove();
 				break;
 			}
 		}
 		return elementChoisi;
 	}
 
-	public static <T> List<T> melanger(List<T> liste) {
-		if (liste == null) {
-			throw new IllegalArgumentException("La liste ne doit pas être nulle.");
+	public static <E> List<E> melanger(List<E> liste) {
+		List<E> resultat = new ArrayList<>();
+		while (!liste.isEmpty()) {
+			resultat.add(extraire(liste));
 		}
-		List<T> listeMelangee = new ArrayList<>();
-		int nombreElements = liste.size();
-		for (int i = 0; i < nombreElements; i++) {
-			T elementExtrait = extraire(liste);
-			listeMelangee.add(elementExtrait);
-		}
-		return listeMelangee;
+		return resultat;
 	}
 
-	public static <T> boolean verifierMelange(List<T> listeA, List<T> listeB) {
-		if (listeA == null || listeB == null)
+	public static <E> boolean verifierMelange(List<E> liste1, List<E> liste2) {
+		if (liste1.size() != liste2.size())
 			return false;
-		if (listeA.size() != listeB.size())
-			return false;
-
-		List<T> dejaVerifies = new ArrayList<>();
-
-		for (T valeur : listeA) {
-			if (dejaVerifies.contains(valeur))
-				continue;
-			int freqA = Collections.frequency(listeA, valeur);
-			int freqB = Collections.frequency(listeB, valeur);
-			if (freqA != freqB)
+		for (E elem : liste1) {
+			if (Collections.frequency(liste1, elem) != Collections.frequency(liste2, elem)) {
 				return false;
-			dejaVerifies.add(valeur);
+			}
 		}
-
-		for (T valeur : listeB) {
-			if (dejaVerifies.contains(valeur))
-				continue;
-			int freqA = Collections.frequency(listeA, valeur);
-			int freqB = Collections.frequency(listeB, valeur);
-			if (freqA != freqB)
-				return false;
-			dejaVerifies.add(valeur);
-		}
-
 		return true;
 	}
 
-	public static <T> List<T> rassembler(List<T> liste) {
-	    if (liste == null) {
-	        throw new IllegalArgumentException("La liste ne doit pas être nulle.");
-	    }
-
-	    List<T> listeRassemblee = new ArrayList<>();
-	    for (T valeur : liste) {
-	        if (!listeRassemblee.contains(valeur)) {
-	            // ajoute tous les exemplaires identiques à la suite
-	            for (T element : liste) {
-	                if (element.equals(valeur)) {
-	                    listeRassemblee.add(element);
-	                }
-	            }
-	        }
-	    }
-	    return listeRassemblee;
+	public static <E> List<E> rassembler(List<E> liste) {
+		List<E> resultat = new ArrayList<>();
+		for (E elem : liste) {
+			if (!resultat.contains(elem)) {
+				ajouterElementsEgaux(liste, resultat, elem);
+			}
+		}
+		return resultat;
 	}
 
-	public static <T> List<T> rassemblerV2(List<T> liste) {
-	    return rassembler(liste);
+	private static <E> void ajouterElementsEgaux(List<E> source, List<E> destination, E valeur) {
+		for (E elem : source) {
+			if (elem.equals(valeur)) {
+				destination.add(elem);
+			}
+		}
 	}
 
-	public static <T> boolean verifierRassemblement(List<T> liste) {
-		if (liste == null)
-			return false;
-		if (liste.size() <= 1)
+	public static <E> List<E> rassemblerV2(List<E> liste) {
+		return rassembler(liste);
+	}
+
+	public static <E> boolean verifierRassemblement(List<E> liste) {
+		if (liste.isEmpty())
 			return true;
 
-		boolean precedenteDefinie = false;
-		T valeurPrecedente = null;
-
-		for (ListIterator<T> premier = liste.listIterator(); premier.hasNext();) {
-			T valeurCourante = premier.next();
-
-			if (!precedenteDefinie) {
-				valeurPrecedente = valeurCourante;
-				precedenteDefinie = true;
-				continue;
-			}
-
-			if (!Objects.equals(valeurCourante, valeurPrecedente)) {
-				for (ListIterator<T> second = liste.listIterator(premier.previousIndex()); second.hasNext();) {
-					T valeurSuivante = second.next();
-					if (Objects.equals(valeurSuivante, valeurPrecedente)) {
+		E valeurPrecedente = null;
+		for (ListIterator<E> it1 = liste.listIterator(); it1.hasNext();) {
+			E valeurActuelle = it1.next();
+			if (valeurPrecedente != null && !valeurActuelle.equals(valeurPrecedente)) {
+				for (ListIterator<E> it2 = liste.listIterator(it1.previousIndex()); it2.hasNext();) {
+					E valeurSuivante = it2.next();
+					if (valeurSuivante.equals(valeurPrecedente)) {
 						return false;
 					}
 				}
-				valeurPrecedente = valeurCourante;
 			}
+			valeurPrecedente = valeurActuelle;
 		}
 		return true;
 	}

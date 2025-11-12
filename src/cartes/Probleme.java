@@ -1,7 +1,7 @@
 package cartes;
 
 public abstract class Probleme extends Carte {
-	protected final Type type;
+	private Type type;
 
 	protected Probleme(Type type) {
 		this.type = type;
@@ -13,9 +13,6 @@ public abstract class Probleme extends Carte {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (!super.equals(obj))
-			return false;
-		Probleme other = (Probleme) obj;
-		return type == other.type;
+		return super.equals(obj) && type.equals(((Probleme) obj).getType());
 	}
 }

@@ -17,8 +17,6 @@ public class Borne extends Carte {
 	}
 	@Override 
 	public boolean equals (Object obj) {
-		if (!super.equals(obj)) return false;
-		Borne other = (Borne) obj;
-		return km == other.km;
+		return super.equals(obj) && ((Borne) obj).km == this.km;
 	}
 }
